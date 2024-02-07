@@ -19,15 +19,18 @@ var students: [Student] = []
 
 // to compute average grade and display
 func averageGrade(){
-    var name = "" // to display later
-    var position = 0 // to get grade of name from finalGrades
+    var name: String = ""
+    var average: Double = 0.0// to display later (average grade)
+    var position: Int = 0 // to get grade of name from finalGrades
     
     print("Which student would you like to choose?")
     if let student = readLine(){
-        for i in names.indices{
-            if names[i].lowercased() == student.lowercased(){ // find name from names
-                name = names[i]
-                position = i
+        for user in students{
+            position += 1
+            if user.name.lowercased() == student.lowercased(){
+                name = user.name
+                average = user.finalGrade
+                break
             }
         }
     }
@@ -35,19 +38,20 @@ func averageGrade(){
         print("Choose again bru.. use a usable name.")
         averageGrade()
     }else{ // if name valid print
-        print("\(name)'s grade in class is \(String(format: "%.2f", finalGrades[position]))\n")
+        print("\(name)'s grade in class is \(String(format: "%.2f", average))\n")
     }
 }
 
 // to fill everyoneGrades and finalGrades list and names list
 func manageData(studentData: [String]){
-    var student: Student // to store list of grades of 1 (add to list of everyone's grade later)
+    var student: Student = Student(allGrades: [], name: "", finalGrade: 0.0) // to store list of grades of 1 (add to list of everyone's grade later)
     var total = 0.0 // operand to compute average
     var sum = 0.0 // operand to compute average
     
     for i in studentData.indices{
         if i == 0{
             student.name = studentData[i] // for printing name of student later
+        }else{
             student.allGrades.append(studentData[i]) // for printing all grades of student later
             if let grade = Double(studentData[i]) // computing operands of average
             {
@@ -56,7 +60,8 @@ func manageData(studentData: [String]){
             }
         }
     }
-    finalGrades.append(sum / total) // store 1 person's average in list
+    student.finalGrade = (sum / total) // store 1 person's average in list
+    students.append(student) // to organize students
 }
 
 // to read file
@@ -77,11 +82,11 @@ func allGrades(){
     
     print("Which student would you like to choose?")
     if let student = readLine(){
-        for user in names.indices{
-            if names[user].lowercased() == student{ // checks if name in list
-                name = names[user]
-                for grade in everyoneGrades[user]{
-                    if grade != everyoneGrades[user][everyoneGrades[user].count-1]{ // to not have comma @ end
+        for user in students{
+            if user.name.lowercased() == student.lowercased(){ // checks if name in list
+                name = user.name
+                for grade in user.allGrades{
+                    if grade != user.allGrades[user.allGrades.count-1]{ // to not have comma @ end
                         grades += grade + ", "
                     }else{
                         grades += grade
@@ -102,15 +107,15 @@ func allGrades(){
 func everyoneAllGrades(){
     var grades = "" // to format
     
-    for name in names.indices{
-        for grade in everyoneGrades[name]{
-            if grade != everyoneGrades[name][everyoneGrades[name].count-1]{ // to not have commas @ end
+    for name in students{
+        for grade in name.allGrades{
+            if grade != name.allGrades[name.allGrades.count-1]{ // to not have commas @ end
                 grades += grade + ", "
             }else{
                 grades += grade
             }
         }
-        print("\(names[name]) grades are: \(grades)\n")
+        print("\(name.name) grades are: \(grades)\n")
         grades = "" // reset for next person
     }
 }
@@ -121,9 +126,9 @@ func classAverage(){
     var sum = 0.0
     var total = 0.0
     
-    for grades in finalGrades{ // computing operands
-        sum += grades
-        total += 1.0
+    for name in students{ // computing operands
+            sum += name.finalGrade
+            total += 1.0
     }
     
     print("The class average is: \(sum / total)\n")
@@ -138,8 +143,8 @@ func assignmentAverage(){
     print("Which assignent would you like to get the average of (1-10):")
     if let numStr = readLine(), let numInt: Int = Int(numStr), numInt >= 1 && numInt <= 10{ // checks if assignment input valid
         assignmentNum = numInt
-        for gradeList in everyoneGrades{
-            if let grade: Double = Double(gradeList[numInt-1]){ // fill operands if assignment is input
+        for name in students{
+            if let grade: Double = Double(name.allGrades[numInt-1]){ // fill operands if assignment is input
                 sum += grade
                 total += 1.0
             }
@@ -153,14 +158,14 @@ func assignmentAverage(){
 
 // to find lowest grade
 func lowestGrade(){
-    var lowest = finalGrades[0] // to have minimum value
+    var lowest = students[0].finalGrade // to have minimum value
     var name = "" // to print name of lowest grade person
     
-    for gradeIndex in finalGrades.indices{ // iterate through list
-        let gradeDouble = finalGrades[gradeIndex]
-        if gradeDouble < lowest{ // to change lowest if any number is lower
-            lowest = gradeDouble
-            name = names[gradeIndex]
+    for student in students{ // iterate through list
+        let grade = student.finalGrade
+        if grade < lowest{ // to change lowest if any number is lower
+            lowest = grade
+            name = student.name
         }
     }
     
@@ -168,14 +173,14 @@ func lowestGrade(){
 }
 // to find highest grade
 func highestGrade(){
-    var highest = finalGrades[0] // to have minimum value
+    var highest = students[0].finalGrade // to have minimum value
     var name = "" //t o print name of highest grade person
     
-    for gradeIndex in finalGrades.indices{ // iterate through list
-        let gradeDouble = finalGrades[gradeIndex]
-        if gradeDouble > highest{ // to change highest if any number is lower
-            highest = gradeDouble
-            name = names[gradeIndex]
+    for student in students{ // iterate through list
+        let grade = student.finalGrade
+        if grade > highest{ // to change highest if any number is lower
+            highest = grade
+            name = student.name
         }
     }
     
@@ -190,9 +195,9 @@ func filterGrades(){
     if let minFilterStr = readLine(), let minFilterInt: Double = Double(minFilterStr){ // input min
         print("Enter the high range you would like to use:")
         if let maxFilterStr = readLine(), let maxFilterInt: Double = Double(maxFilterStr){ // input max
-            for gradeIndex in finalGrades.indices{ // iterate grades to find range
-                if finalGrades[gradeIndex] >= minFilterInt && finalGrades[gradeIndex] <= maxFilterInt{ // if in range, add to formatted string
-                    filteredList += "\(names[gradeIndex]): \(finalGrades[gradeIndex])\n"
+            for student in students{ // iterate grades to find range
+                if student.finalGrade >= minFilterInt && student.finalGrade <= maxFilterInt{ // if in range, add to formatted string
+                    filteredList += "\(student.name): \(student.finalGrade)\n"
                 }
             }
         }
