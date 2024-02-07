@@ -21,12 +21,10 @@ var students: [Student] = []
 func averageGrade(){
     var name: String = ""
     var average: Double = 0.0// to display later (average grade)
-    var position: Int = 0 // to get grade of name from finalGrades
     
     print("Which student would you like to choose?")
     if let student = readLine(){
         for user in students{
-            position += 1
             if user.name.lowercased() == student.lowercased(){
                 name = user.name
                 average = user.finalGrade
